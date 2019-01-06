@@ -2,7 +2,7 @@ package googleiapclient
 
 // run tests with:
 //
-// GOOGLE_CREDS="$(cat rchapman-f9bcc275ce03.json | base64)" go test
+//    GOOGLE_CREDS="$(cat rchapman-f9bcc275ce03.json | base64)" go test
 //
 
 import (

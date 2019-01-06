@@ -38,11 +38,11 @@ type IAPClient struct {
 //
 // For example, if you have a service account file from GCP named proj.adf102a21567.json:
 //
-// export GOOGLE_CREDS="$(cat proj.adf102a21567.json | base64)"
-// ./goprogramUsingThisLibrary
+//    export GOOGLE_CREDS="$(cat proj.adf102a21567.json | base64)"
+//    ./goprogramUsingThisLibrary
 //
 // in program code:
-// iapClient := NewIAPClient("GOOGLE_CREDS")
+//    iapClient := NewIAPClient("GOOGLE_CREDS")
 //
 func NewIAPClient(envVarName string) *IAPClient {
 	return &IAPClient{envVarName: envVarName}
@@ -113,22 +113,22 @@ func (i *IAPClient) loadCredentials() error {
 // Edit OAuth Client, Client ID
 //
 // It will look something like
-// "64456944346-t71n9gg0pps1p251pa9a4nl505k212sl.apps.googleusercontent.com"
+//    "823926513327-pr0714rqtdb223bahl0nq2jcd4ur79ec.apps.googleusercontent.com"
 // (without http:// or https://)
 //
-// Another method which works as of this writing is to curl an IAP protected
+// Another method which works as of this writing is to curl a IAP protected
 // endpoint and look at the redirect:
 //
-// $ curl -v https://test.initech.com/nonexist
-// > GET /nonexist HTTP/1.1
-// [...]
+//    $ curl -v https://test.initech.com/nonexist
+//    > GET /nonexist HTTP/1.1
+//    [...]
 //
-// < HTTP/1.1 302 Found
-// [...]
-// < Location: https://accounts.google.com/o/oauth2/v2/auth?client_id=64456944346-t71n9gg0pps1p251pa9a4nl505k212sl.apps.googleusercontent.com&response_type=code&scope=openid+email&redirect_uri=https://test.initech.com/_gcp_gatekeeper/authenticate&state=XXXXXXX
-// < X-Goog-IAP-Generated-Response: true
-// < Content-Length: 0
-// [...]
+//    < HTTP/1.1 302 Found
+//    [...]
+//    < Location: https://accounts.google.com/o/oauth2/v2/auth?client_id=823926513327-pr0714rqtdb223bahl0nq2jcd4ur79ec.apps.googleusercontent.com&response_type=code&scope=openid+email&redirect_uri=https://test.initech.com/_gcp_gatekeeper/authenticate&state=XXXXXXX
+//    < X-Goog-IAP-Generated-Response: true
+//    < Content-Length: 0
+//    [...]
 //
 // The returned JWT token is good for a period of time.  It is your responsibilty to
 // check the expiration and request a new JWT token before the old one expires.
@@ -136,25 +136,25 @@ func (i *IAPClient) loadCredentials() error {
 // Once you have the JWT token, you can make requests to the IAP protected endpoint by passing the JWT
 // as a bearer token.  For example:
 //
-// iapClient := NewIAPClient("GOOGLE_CREDS")
-// token, err := iapClient.JWTToken("64456944346-t71n9gg0pps1p251pa9a4nl505k212sl.apps.googleusercontent.com")
-// if err != nil {
-//         log.Panicf("Could not get JWT token: %+v", err)
-// }
+//    iapClient := NewIAPClient("GOOGLE_CREDS")
+//    token, err := iapClient.JWTToken("823926513327-pr0714rqtdb223bahl0nq2jcd4ur79ec.apps.googleusercontent.com")
+//    if err != nil {
+//            log.Panicf("Could not get JWT token: %+v", err)
+//    }
 //
-// url := "https://test.initech.com"
-// req, err := http.NewRequest("GET", url, nil)
-// if err != nil {
-//         log.Panicf("Could not create GET request to %s: %+v", url, err)
-// }
+//    url := "https://test.initech.com"
+//    req, err := http.NewRequest("GET", url, nil)
+//    if err != nil {
+//            log.Panicf("Could not create GET request to %s: %+v", url, err)
+//    }
 //
-// req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token)
-// client := http.Client{}
-// resp, err := client.Do(req)
-// if resp != nil {
-//         defer resp.Body.Close()
-// }
-// /* handle response */
+//    req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token)
+//    client := http.Client{}
+//    resp, err := client.Do(req)
+//    if resp != nil {
+//            defer resp.Body.Close()
+//    }
+//    /* handle response */
 //
 func (i *IAPClient) JWTToken(targetAudience string) (string, error) {
 	err := i.loadCredentials()
