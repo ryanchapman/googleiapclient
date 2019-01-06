@@ -1,0 +1,7 @@
+dist: trusty
+sudo: required
+install: ./make.bash deps
+
+script:
+- ./make.bash install_golang
+- ./make.bash test
