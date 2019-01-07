@@ -4,6 +4,7 @@ A golang library which provides a way to use a service account to programmatical
 resources behind Google Cloud's Identity Aware Proxy.
 
 [![Build Status](https://travis-ci.org/ryanchapman/googleiapclient.svg?branch=master)](https://travis-ci.org/ryanchapman/googleiapclient)
+[![GoDoc](https://godoc.org/github.com/ryanchapman/googleiapclient?status.svg)](https://godoc.org/github.com/ryanchapman/googleiapclient)
 
 ## Documentation
 
