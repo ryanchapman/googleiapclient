@@ -132,12 +132,14 @@ func (i *IAPClient) loadCredentials() error {
 //
 // The returned JWT token is good for a period of time.  It is your responsibilty to
 // check the expiration and request a new JWT token before the old one expires.
+// Expiration is encoded in the JWT that is returned.
 //
 // Once you have the JWT token, you can make requests to the IAP protected endpoint by passing the JWT
 // as a bearer token.  For example:
 //
 //    iapClient := NewIAPClient("GOOGLE_CREDS")
-//    token, err := iapClient.JWTToken("823926513327-pr0714rqtdb223bahl0nq2jcd4ur79ec.apps.googleusercontent.com")
+//    requestedExpiration := time.Now().UTC.().Add(1 * time.Hour)
+//    token, _, err := iapClient.JWTToken("823926513327-pr0714rqtdb223bahl0nq2jcd4ur79ec.apps.googleusercontent.com", requestedExpiration)
 //    if err != nil {
 //            log.Panicf("Could not get JWT token: %+v", err)
 //    }
@@ -156,15 +158,16 @@ func (i *IAPClient) loadCredentials() error {
 //    }
 //    /* handle response */
 //
-func (i *IAPClient) JWTToken(targetAudience string) (string, error) {
-	err := i.loadCredentials()
+func (i *IAPClient) JWTToken(targetAudience string, requestedExpiry time.Time) (jwtToken string, tokenWillAutorenew bool, err error) {
+	tokenWillAutorenew = false // TODO(rchapman): add support for auto-renewing tokens
+	err = i.loadCredentials()
 	if err != nil {
-		return "", err
+		return "", tokenWillAutorenew, err
 	}
 	sigOpts := (&jose.SignerOptions{}).WithType("JWT")
 	sig, err := jose.NewSigner(jose.SigningKey{Algorithm: jose.RS256, Key: i.RSAPrivateKey}, sigOpts)
 	if err != nil {
-		return "", fmt.Errorf("could not create NewSigner: %s", err)
+		return "", tokenWillAutorenew, fmt.Errorf("could not create NewSigner: %s", err)
 	}
 
 	type customClaims struct {
@@ -178,14 +181,14 @@ func (i *IAPClient) JWTToken(targetAudience string) (string, error) {
 	claims := customClaims{
 		Issuer:         i.ClientEmail,
 		Audience:       TOKEN_URL,
-		Expiry:         jwt.NewNumericDate(time.Now().UTC().Add(1 * time.Hour)),
+		Expiry:         jwt.NewNumericDate(requestedExpiry),
 		IssuedAt:       jwt.NewNumericDate(time.Now()),
 		TargetAudience: targetAudience,
 	}
 
 	rawJwt, err := jwt.Signed(sig).Claims(claims).CompactSerialize()
 	if err != nil {
-		return "", err
+		return "", tokenWillAutorenew, err
 	}
 
 	params := "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion="
@@ -193,21 +196,25 @@ func (i *IAPClient) JWTToken(targetAudience string) (string, error) {
 	reqBody := []byte(params)
 	req, err := http.NewRequest("POST", TOKEN_URL, bytes.NewBuffer(reqBody))
 	if err != nil {
-		return "", fmt.Errorf("While building request to contact %s for token, got err=%+v", TOKEN_URL, err)
+		err = fmt.Errorf("While building request to contact %s for token, got err=%+v", TOKEN_URL, err)
+		return "", tokenWillAutorenew, err
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	client := http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("While contacting %s to get token, got resp=%+v, err=%+v", TOKEN_URL, resp, err)
+		err = fmt.Errorf("While contacting %s to get token, got resp=%+v, err=%+v", TOKEN_URL, resp, err)
+		return "", tokenWillAutorenew, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("While contacting %s for token, could not read bytes from response, err=%+v", TOKEN_URL, err)
+		err = fmt.Errorf("While contacting %s for token, could not read bytes from response, err=%+v", TOKEN_URL, err)
+		return "", tokenWillAutorenew, err
 	}
 	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("While contacting %s for token, got non-200 response (%d), body=%s", TOKEN_URL, resp.StatusCode, body)
+		err = fmt.Errorf("While contacting %s for token, got non-200 response (%d), body=%s", TOKEN_URL, resp.StatusCode, body)
+		return "", tokenWillAutorenew, err
 	}
 	type googleOauth2TokenResponse struct {
 		IDToken string `json:"id_token"`
@@ -215,7 +222,8 @@ func (i *IAPClient) JWTToken(targetAudience string) (string, error) {
 	tokenResp := new(googleOauth2TokenResponse)
 	err = json.Unmarshal([]byte(body), tokenResp)
 	if err != nil || tokenResp == nil {
-		return "", fmt.Errorf("While contacting %s for token, could not unmarshal json response, err=%+v", TOKEN_URL, err)
+		err = fmt.Errorf("While contacting %s for token, could not unmarshal json response, err=%+v", TOKEN_URL, err)
+		return "", tokenWillAutorenew, err
 	}
-	return tokenResp.IDToken, nil
+	return tokenResp.IDToken, tokenWillAutorenew, nil
 }

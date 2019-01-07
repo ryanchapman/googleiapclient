@@ -30,7 +30,7 @@
 //    < Content-Length: 0
 //    [...]
 //
-// 4. Add code to your program to use the library.  In this example, GOOGLE_CREDS is the environment variable which contains the base64 encoded service account credentials in json format.  The parameter to JWTToken() is the OAuth client ID  you found in step #3.  The OAuth client ID will be encoded as target_audience before it is sent to the Google OAuth service to obtain a JWT token.
+// 4. Add code to your program to use the library.  In this example, GOOGLE_CREDS is the environment variable which contains the base64 encoded service account credentials in json format.  The first parameter to JWTToken() is the OAuth client ID  you found in step #3.  The OAuth client ID will be encoded as target_audience before it is sent to the Google OAuth service to obtain a JWT token.
 //
 //    import (
 //           "github.com/ryanchapman/googleiapclient"
@@ -39,7 +39,8 @@
 //    func main() {
 //            // get service account from environment variable   GOOGLE_CREDS
 //            iapClient := googleiapclient.NewIAPClient("GOOGLE_CREDS")
-//            token, err := iapClient.JWTToken("823926513327-pr0714rqtdb223bahl0nq2jcd4ur79ec.apps.googleusercontent.com")
+//            requestedExpiration := time.Now().UTC().Add(1 * time.Hour)
+//            token, _, err := iapClient.JWTToken("823926513327-pr0714rqtdb223bahl0nq2jcd4ur79ec.apps.googleusercontent.com", requestedExpiration)
 //            if err != nil {
 //                    log.Panicf("Could not get JWT token: %+v", err)
 //            }
