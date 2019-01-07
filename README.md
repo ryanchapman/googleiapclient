@@ -7,7 +7,7 @@ resources behind Google Cloud's Identity Aware Proxy.
 
 ## Documentation
 
-[https://godoc.org/github.com/ryanchapman/googleiapclient]()
+[https://godoc.org/github.com/ryanchapman/googleiapclient](https://godoc.org/github.com/ryanchapman/googleiapclient)
 
 ## Usage
 
