@@ -48,10 +48,10 @@ resources behind Google Cloud's Identity Aware Proxy.
     )
     
     func main() {
+            requestedExpiration := time.Duration(1 * time.Hour)
             // get service account from environment variable   GOOGLE_CREDS
-            iapClient := googleiapclient.NewIAPClient("GOOGLE_CREDS")
-            requestedExpiration := time.Now().UTC().Add(1 * time.Hour)
-            token, _, err := iapClient.JWTToken("823926513327-pr0714rqtdb223bahl0nq2jcd4ur79ec.apps.googleusercontent.com", requestedExpiration)
+            iapClient := googleiapclient.NewIAPClient("GOOGLE_CREDS", requestedExpiration)
+            token, _, err := iapClient.JWTToken("823926513327-pr0714rqtdb223bahl0nq2jcd4ur79ec.apps.googleusercontent.com")
             if err != nil {
                     log.Panicf("Could not get JWT token: %+v", err)
             }
@@ -73,3 +73,5 @@ resources behind Google Cloud's Identity Aware Proxy.
             /* handle response */
     }
     ```
+    
+5. The iapclient struct will automatically renew tokens; you just need to call JWTToken() right before you need to use the token to get the latest.

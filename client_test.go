@@ -16,14 +16,16 @@ const audience = "823926513327-pr0714rqtdb223bahl0nq2jcd4ur79ec.apps.googleuserc
 
 func TestClient(t *testing.T) {
 	assert := assert.New(t)
-	iapClient := NewIAPClient("GOOGLE_CREDS")
-	// JWTToken() should make a call to the Google OAuth2 service to get a bearer token
-	requestedExpiry := time.Now().UTC().Add(1 * time.Hour)
-	token, tokenWillAutorenew, err := iapClient.JWTToken(audience, requestedExpiry)
+	iapClient := NewIAPClient("GOOGLE_CREDS", 60*time.Minute)
+	token, err := iapClient.JWTToken(audience)
+	time.Sleep(2 * time.Second) // allow time for background token refresh to start
+	assert.Equal(true, iapClient.BackgroundTokenRefreshRunning(), "JWT Token background refresh should be running")
+	currentExpiration := iapClient.CurrentJWTTokenExpiration()
+	nowPlus60Min := time.Now().UTC().Add(60 * time.Minute)
+	tolerance := 10 * time.Second
+	assert.WithinDuration(nowPlus60Min, currentExpiration, tolerance, "Current JWT Token should expire within 60 minutes (+/- 10s)")
 	assert.Equal(nil, err, "JWTToken(audience) should have returned err=nil")
 	assert.NotEqual("", token, "JWTToken(audience) should have returned token != \"\"")
-	// TODO(rchapman): test that expiration is after requestedExpiry
-	assert.Equal(false, tokenWillAutorenew, "JWTToken() returned that token will auto-renew, which is not yet implemented")
 	// TODO(rchapman): we don't currently have a IAP enabled load balancer to test against
 	//                 mainly because GCP LBs have a monthly cost associated with them.
 }

@@ -39,7 +39,7 @@
 //    func main() {
 //            // get service account from environment variable   GOOGLE_CREDS
 //            iapClient := googleiapclient.NewIAPClient("GOOGLE_CREDS")
-//            requestedExpiration := time.Now().UTC().Add(1 * time.Hour)
+//            requestedExpiration := time.Now().UTC().Add(1 * time.Hour) // Google's OAuth service may change this
 //            token, _, err := iapClient.JWTToken("823926513327-pr0714rqtdb223bahl0nq2jcd4ur79ec.apps.googleusercontent.com", requestedExpiration)
 //            if err != nil {
 //                    log.Panicf("Could not get JWT token: %+v", err)
