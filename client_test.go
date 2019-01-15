@@ -26,6 +26,8 @@ func TestClient(t *testing.T) {
 	assert.WithinDuration(nowPlus60Min, currentExpiration, tolerance, "Current JWT Token should expire within 60 minutes (+/- 10s)")
 	assert.Equal(nil, err, "JWTToken(audience) should have returned err=nil")
 	assert.NotEqual("", token, "JWTToken(audience) should have returned token != \"\"")
+
+	iapClient.Done()
 	// TODO(rchapman): we don't currently have a IAP enabled load balancer to test against
 	//                 mainly because GCP LBs have a monthly cost associated with them.
 }
