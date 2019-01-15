@@ -75,3 +75,5 @@ resources behind Google Cloud's Identity Aware Proxy.
     ```
     
 5. The iapclient struct will automatically renew tokens; you just need to call JWTToken() right before you need to use the token to get the latest.
+
+6. Call `iapClient.Done()` when you want iapclient to stop updating tokens.

@@ -39,6 +39,8 @@ type IAPClient struct {
 	currentJWTTokenExpiration       time.Time
 	currentJWTTokenExpirationMu     sync.RWMutex
 	nextTokenExpiry                 time.Duration
+	backgroundTaskShouldExit        bool
+	backgroundTaskShouldExitMu      sync.RWMutex
 }
 
 // Create a new IAPClient with credentials that are base64 encoded in an environment
@@ -124,6 +126,9 @@ func NewIAPClient(envVarName string, requestedTokenExpiry time.Duration) *IAPCli
 //    }
 //    /* handle response */
 //
+//    // stop automatic updating of tokens in the background
+//    iapClient.Done()
+//
 func (i *IAPClient) JWTToken(targetAudience string) (jwtToken string, err error) {
 	err = i.loadCredentials()
 	if err != nil {
@@ -146,12 +151,23 @@ func (i *IAPClient) JWTToken(targetAudience string) (jwtToken string, err error)
 
 // Return if the background JWT token refresh is currently running
 func (i *IAPClient) BackgroundTokenRefreshRunning() bool {
+	i.backgroundTokenRefreshRunningMu.RLock()
+	defer i.backgroundTokenRefreshRunningMu.RUnlock()
 	return i.backgroundTokenRefreshRunning
 }
 
 // Return when the current JWT token will expire
 func (i *IAPClient) CurrentJWTTokenExpiration() time.Time {
+	i.currentJWTTokenExpirationMu.RLock()
+	defer i.currentJWTTokenExpirationMu.RUnlock()
 	return i.currentJWTTokenExpiration
+}
+
+// Call Done() to stop automatic updating of tokens (usually before you delete an IAPClient struct)
+func (i *IAPClient) Done() {
+	i.backgroundTaskShouldExitMu.Lock()
+	i.backgroundTaskShouldExit = true
+	i.backgroundTaskShouldExitMu.Unlock()
 }
 
 // Utility function which, given a JWT string, returns the token expiration time
@@ -229,6 +245,7 @@ func (i *IAPClient) loadCredentials() error {
 
 // refreshTokenInBackground() is meant to be called as a goroutine
 func (i *IAPClient) refreshTokenInBackground(targetAudience string) {
+	label := fmt.Sprintf("JWTBackgroundRefresh (%s)", targetAudience)
 	// no way to atomically promote a read lock to a write lock
 	// (see https://github.com/golang/go/issues/4026), so take a write lock.
 	//
@@ -245,14 +262,13 @@ func (i *IAPClient) refreshTokenInBackground(targetAudience string) {
 		i.backgroundTokenRefreshRunningMu.Unlock()
 	}
 
-	label := fmt.Sprintf("JWTBackgroundRefresh (%s)", targetAudience)
 	for {
 		log.Infof("%s: start", label)
 
-		if i == nil {
-			// IAPClient will be set to nil when it is garbage collected.
-			// we should exit the goroutine at that point and quit
-			// refreshing tokens
+		i.backgroundTaskShouldExitMu.RLock()
+		shouldExit := i.backgroundTaskShouldExit
+		i.backgroundTaskShouldExitMu.RUnlock()
+		if i == nil || shouldExit {
 			log.Infof("%s: quitting", label)
 			return
 		}
