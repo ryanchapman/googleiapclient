@@ -51,7 +51,7 @@ resources behind Google Cloud's Identity Aware Proxy.
             requestedExpiration := time.Duration(1 * time.Hour)
             // get service account from environment variable   GOOGLE_CREDS
             iapClient := googleiapclient.NewIAPClient("GOOGLE_CREDS", requestedExpiration)
-            token, _, err := iapClient.JWTToken("823926513327-pr0714rqtdb223bahl0nq2jcd4ur79ec.apps.googleusercontent.com")
+            token, err := iapClient.JWTToken("823926513327-pr0714rqtdb223bahl0nq2jcd4ur79ec.apps.googleusercontent.com")
             if err != nil {
                     log.Panicf("Could not get JWT token: %+v", err)
             }

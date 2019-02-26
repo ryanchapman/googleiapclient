@@ -107,7 +107,7 @@ func NewIAPClient(envVarName string, requestedTokenExpiry time.Duration) *IAPCli
 // as a bearer token.  For example:
 //
 //    iapClient := NewIAPClient("GOOGLE_CREDS")
-//    token, _, err := iapClient.JWTToken("823926513327-pr0714rqtdb223bahl0nq2jcd4ur79ec.apps.googleusercontent.com")
+//    token, err := iapClient.JWTToken("823926513327-pr0714rqtdb223bahl0nq2jcd4ur79ec.apps.googleusercontent.com")
 //    if err != nil {
 //            log.Panicf("Could not get JWT token: %+v", err)
 //    }
