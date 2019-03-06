@@ -313,11 +313,11 @@ func (i *IAPClient) getJWTTokenFromGoogle(targetAudience string) (jwtToken strin
 	}
 
 	type customClaims struct {
-		Issuer         string          `json:"iss,omitempty"`
-		Audience       string          `json:"aud,omitempty"`
-		Expiry         jwt.NumericDate `json:"exp,omitempty"`
-		IssuedAt       jwt.NumericDate `json:"iat,omitempty"`
-		TargetAudience string          `json:"target_audience,omitempty"`
+		Issuer         string           `json:"iss,omitempty"`
+		Audience       string           `json:"aud,omitempty"`
+		Expiry         *jwt.NumericDate `json:"exp,omitempty"`
+		IssuedAt       *jwt.NumericDate `json:"iat,omitempty"`
+		TargetAudience string           `json:"target_audience,omitempty"`
 	}
 
 	requestedExpiryTime := time.Now().UTC().Add(i.nextTokenExpiry)
