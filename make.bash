@@ -78,6 +78,13 @@ function deps ()
     logit "Installing dependencies: done"
 }
 
+function geniaptoken
+{
+    logit "Compiling geniaptoken"
+    run "go build -o geniaptoken cmd/geniaptoken/main.go"
+    logit "Compiling geniaptoken: done"
+}
+
 function test
 {
     logit "Running test function"
@@ -96,6 +103,7 @@ function usage
     echo
     echo "Commands:"
     echo
+    echo "    geniaptoken                Compile command line tool (geniaptoken)"
     echo "    test                       Run tests"
     echo
 }
