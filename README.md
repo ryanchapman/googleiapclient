@@ -1,6 +1,6 @@
 # googleiapclient
 
-A golang library which provides a way to use a service account to programmatically access
+A golang library and reference command line tool which provides a way to use a service account to programmatically access
 resources behind Google Cloud's Identity Aware Proxy.
 
 [![Build Status](https://travis-ci.org/ryanchapman/googleiapclient.svg?branch=master)](https://travis-ci.org/ryanchapman/googleiapclient)
@@ -10,7 +10,7 @@ resources behind Google Cloud's Identity Aware Proxy.
 
 [https://godoc.org/github.com/ryanchapman/googleiapclient](https://godoc.org/github.com/ryanchapman/googleiapclient)
 
-## Usage
+## Library Usage
 
 1. Create a service account in the GCP console and download credentials in JSON format (the P12 option does not work).
 
@@ -77,3 +77,28 @@ resources behind Google Cloud's Identity Aware Proxy.
 5. The iapclient struct will automatically renew tokens; you just need to call JWTToken() right before you need to use the token to get the latest.
 
 6. Call `iapClient.Done()` when you want iapclient to stop updating tokens.
+
+## Command Line Tool Usage
+
+1. Create a service account in the GCP console and download credentials in JSON format (the P12 option does not work).
+
+2. Grant the service account access to your IAP protected load balancer(s) by giving the service account the role "IAP-secured Web App User" in your GCP project.
+
+3. Compile geniaptoken by running `./make.bash geniaptoken` 
+
+4. Run geniaptoken to generate a JWT (JSON Web Token) that can be used with the GCP load balancer  (see Library Usage, step #3 above for help with finding your OAuth Client ID) `./geniaptoken --google-creds-file=creds.json --requested-expiration=1h --oauth-client-id=823926513327-pr0714rqtdb223bahl0nq2jcd4ur79ec.apps.googleusercontent.com`
+
+5. The geniaptoken tool will output a JWT as an `Authorization` header. For example, `Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.XbPfbIHMI6arZ3Y922BhjWgQzWXcXNrz0ogtVhfEd2o`.  You can add that header to your http request to your IAP protected load balancer.
+
+6. Example run:
+
+```
+$ Dec 29 06:34:11.N +01 make.bash[7460]: Compiling geniaptoken
+Dec 29 06:34:11.N +01 make.bash[7460]: go build -o geniaptoken cmd/geniaptoken/main.go
+Dec 29 06:34:12.N +01 make.bash[7460]: go build -o geniaptoken cmd/geniaptoken/main.go returned 0
+Dec 29 06:34:12.N +01 make.bash[7460]: Compiling geniaptoken: done
+
+$ curl -D- -s -H "$(./geniaptoken --google-creds-file=onx-staging-qa-iap.json --requested-expiration=1h --oauth-client-id=823926513327-pr0714rqtdb223bahl0nq2jcd4ur79ec.apps.googleusercontent.com)" https://test.initech.com
+HTTP/2 200
+[...]
+```
