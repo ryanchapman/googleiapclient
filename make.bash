@@ -126,7 +126,7 @@ function main () {
 
     shift
     if [[ "$TRAVIS" == "true" ]]; then
-        eval "$(gimme 1.11)"
+        eval "$(gimme 1.13)"
     fi
     ${func_to_exec} $*
     echo
