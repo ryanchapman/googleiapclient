@@ -4,11 +4,11 @@ A golang library and reference command line tool which provides a way to use a s
 resources behind Google Cloud's Identity Aware Proxy.
 
 [![Build Status](https://travis-ci.org/ryanchapman/googleiapclient.svg?branch=master)](https://travis-ci.org/ryanchapman/googleiapclient)
-[![GoDoc](https://godoc.org/github.com/ryanchapman/googleiapclient?status.svg)](https://godoc.org/github.com/ryanchapman/googleiapclient)
+[![GoDoc](https://pkg.go.dev/github.com/ryanchapman/googleiapclient?tab=doc)](https://pkg.go.dev/github.com/ryanchapman/googleiapclient?tab=doc)
 
 ## Documentation
 
-[https://godoc.org/github.com/ryanchapman/googleiapclient](https://godoc.org/github.com/ryanchapman/googleiapclient)
+[https://pkg.go.dev/github.com/ryanchapman/googleiapclient?tab=doc](https://pkg.go.dev/github.com/ryanchapman/googleiapclient?tab=doc)
 
 ## Library Usage
 
